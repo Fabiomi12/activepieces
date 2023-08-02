@@ -1,13 +1,11 @@
+import {TriggerBase, TriggerStrategy, WebhookHandshakeStrategy, WebhookResponse,} from '@activepieces/pieces-framework'
 import {
-    TriggerBase,
-    TriggerStrategy,
-    WebhookHandshakeStrategy,
-    WebhookResponse,
-} from '@activepieces/pieces-framework'
-import {
-    ExecutionType,
+    ActivepiecesError,
     EngineResponseStatus,
+    ErrorCode,
+    ExecutionType,
     FlowVersion,
+    isNil,
     PieceTrigger,
     ProjectId,
     RunEnvironment,
@@ -15,22 +13,17 @@ import {
     TriggerPayload,
     TriggerType,
 } from '@activepieces/shared'
-import { ActivepiecesError, ErrorCode } from '@activepieces/shared'
-import { flowQueue } from '../workers/flow-worker/flow-queue'
-import {
-    EngineHelperResponse,
-    EngineHelperTriggerResult,
-    engineHelper,
-} from './engine-helper'
-import { webhookService } from '../webhooks/webhook-service'
-import { appEventRoutingService } from '../app-event-routing/app-event-routing.service'
-import { isNil } from '@activepieces/shared'
-import { LATEST_JOB_DATA_SCHEMA_VERSION } from '../workers/flow-worker/job-data'
-import { pieceMetadataService } from '../pieces/piece-metadata-service'
-import { logger } from './logger'
-import { system } from './system/system'
-import { SystemProp } from './system/system-prop'
-import { JobType } from '../workers/flow-worker/queues/queue'
+import {flowQueue} from '../workers/flow-worker/flow-queue'
+import {engineHelper, EngineHelperResponse, EngineHelperTriggerResult,} from './engine-helper'
+import {webhookService} from '../webhooks/webhook-service'
+import {appEventRoutingService} from '../app-event-routing/app-event-routing.service'
+import {LATEST_JOB_DATA_SCHEMA_VERSION} from '../workers/flow-worker/job-data'
+import {pieceMetadataService} from '../pieces/piece-metadata-service'
+import {logger} from './logger'
+import {system} from './system/system'
+import {SystemProp} from './system/system-prop'
+import {JobType} from '../workers/flow-worker/queues/queue'
+import {appConsumerService} from '../app-consumer/app-consumer.service';
 
 const POLLING_FREQUENCY_CRON_EXPRESSON = `*/${system.getNumber(
     SystemProp.TRIGGER_DEFAULT_POLL_INTERVAL,
@@ -51,12 +44,12 @@ export const triggerUtils = {
                 return null
             }
             const strategy =
-        handshakeConfig.strategy ?? WebhookHandshakeStrategy.NONE
+                handshakeConfig.strategy ?? WebhookHandshakeStrategy.NONE
             switch (strategy) {
                 case WebhookHandshakeStrategy.HEADER_PRESENT: {
                     if (
                         handshakeConfig.paramName &&
-            handshakeConfig.paramName.toLowerCase() in payload.headers
+                        handshakeConfig.paramName.toLowerCase() in payload.headers
                     ) {
                         return await executeHandshake({
                             flowVersion,
@@ -69,7 +62,7 @@ export const triggerUtils = {
                 case WebhookHandshakeStrategy.QUERY_PRESENT: {
                     if (
                         handshakeConfig.paramName &&
-            handshakeConfig.paramName in payload.queryParams
+                        handshakeConfig.paramName in payload.queryParams
                     ) {
                         return await executeHandshake({
                             flowVersion,
@@ -82,8 +75,8 @@ export const triggerUtils = {
                 case WebhookHandshakeStrategy.BODY_PARAM_PRESENT: {
                     if (
                         handshakeConfig.paramName &&
-            typeof payload.body === 'object' &&
-            handshakeConfig.paramName in payload.body
+                        typeof payload.body === 'object' &&
+                        handshakeConfig.paramName in payload.body
                     ) {
                         return await executeHandshake({
                             flowVersion,
@@ -126,7 +119,7 @@ export const triggerUtils = {
                 else {
                     logger.error(
                         `Flow ${flowTrigger.name} with ${pieceTrigger.name} trigger throws and error, returning as zero payload ` +
-              JSON.stringify(result),
+                        JSON.stringify(result),
                     )
                     payloads = []
                 }
@@ -144,7 +137,7 @@ export const triggerUtils = {
         params: EnableOrDisableParams,
     ): Promise<EngineHelperResponse<
         EngineHelperTriggerResult<TriggerHookType.ON_ENABLE>
-        > | null> {
+    > | null> {
         const { flowVersion, projectId, simulate } = params
 
         if (flowVersion.trigger.type !== TriggerType.PIECE) {
@@ -162,7 +155,7 @@ export const triggerUtils = {
         params: EnableOrDisableParams,
     ): Promise<EngineHelperResponse<
         EngineHelperTriggerResult<TriggerHookType.ON_DISABLE>
-        > | null> {
+    > | null> {
         const { flowVersion, projectId, simulate } = params
 
         if (flowVersion.trigger.type !== TriggerType.PIECE) {
@@ -240,6 +233,11 @@ const disablePieceTrigger = async (params: EnableOrDisableParams) => {
                 id: flowVersion.id,
             })
             break
+        case TriggerStrategy.KAFKA_MESSAGE_CONSUMER:
+            await  appConsumerService.deleteListeners({
+                projectId,
+                flowId: flowVersion.flowId,
+            })
     }
 
     return engineHelperResponse
@@ -305,6 +303,21 @@ const enablePieceTrigger = async (params: EnableOrDisableParams) => {
                     executionType: ExecutionType.BEGIN,
                 },
                 scheduleOptions: engineHelperResponse.result.scheduleOptions,
+            })
+            break
+        }
+        case TriggerStrategy.KAFKA_MESSAGE_CONSUMER: {
+            if (isNil(engineHelperResponse.result.consumer)) {
+                break
+            }
+            const consumer = engineHelperResponse.result.consumer
+            await appConsumerService.createConsumer({
+                host: consumer.host,
+                topic: consumer.topic,
+                clientId: consumer.clientId,
+                groupId: consumer.groupId,
+                flowId: flowVersion.flowId,
+                projectId,
             })
             break
         }

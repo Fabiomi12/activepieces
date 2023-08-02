@@ -39,7 +39,7 @@ export const triggerEventService = {
 
     async test({ projectId, flow }: { projectId: ProjectId, flow: Flow }): Promise<SeekPage<unknown>> {
         const trigger = flow.version.trigger
-        const emptyPage = paginationHelper.createPage<TriggerEvent>([], null)
+        const emptyPage = paginationHelper.createPage<TriggerEvent>([], undefined)
         switch (trigger.type) {
             case TriggerType.WEBHOOK:
                 throw new Error('Cannot be tested')

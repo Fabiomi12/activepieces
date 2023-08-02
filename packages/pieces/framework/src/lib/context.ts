@@ -1,6 +1,19 @@
-import { AppConnectionValue, ExecutionType, FlowRunId, PauseMetadata, StopResponse, TriggerPayload } from "@activepieces/shared";
-import { TriggerStrategy } from "./trigger/trigger";
-import { NonAuthPiecePropertyMap, PieceAuthProperty, PiecePropValueSchema, PiecePropertyMap, StaticPropsValue } from "./property";
+import {
+    AppConnectionValue,
+    ExecutionType,
+    FlowRunId,
+    PauseMetadata,
+    StopResponse,
+    TriggerPayload
+} from "@activepieces/shared";
+import {TriggerStrategy} from "./trigger/trigger";
+import {
+    NonAuthPiecePropertyMap,
+    PieceAuthProperty,
+    PiecePropValueSchema,
+    PiecePropertyMap,
+    StaticPropsValue
+} from "./property";
 
 type BaseContext<PieceAuth extends PieceAuthProperty, Props extends PiecePropertyMap> = {
     auth: PiecePropValueSchema<PieceAuth>,
@@ -31,6 +44,17 @@ type WebhookTriggerHookContext<PieceAuth extends PieceAuthProperty, TriggerProps
         payload: TriggerPayload
     }
 
+type KafkaMessageConsumerTriggerHookContext<PieceAuth extends PieceAuthProperty, TriggerProps extends PiecePropertyMap> =
+    BaseContext<PieceAuth, TriggerProps> & {
+    createConsumer(options: {
+        host: string;
+        topic: string;
+        groupId: string;
+        clientId: string;
+    }): void
+    payload: any
+}
+
 export type TriggerHookContext<
     PieceAuth extends PieceAuthProperty,
     TriggerProps extends PiecePropertyMap,
@@ -41,7 +65,9 @@ export type TriggerHookContext<
         ? PollingTriggerHookContext<PieceAuth, TriggerProps>
         : S extends TriggerStrategy.WEBHOOK
             ? WebhookTriggerHookContext<PieceAuth, TriggerProps>
-            : never
+            : S extends TriggerStrategy.KAFKA_MESSAGE_CONSUMER
+                ? KafkaMessageConsumerTriggerHookContext<PieceAuth, TriggerProps>
+                : never
 
 export type StopHookParams = {
     response: StopResponse

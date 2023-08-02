@@ -8,6 +8,8 @@ import { ApEdition } from '@activepieces/shared'
 import { seedDevData } from './app/database/seeds/dev-seeds'
 import { flowQueueConsumer } from './app/workers/flow-worker/flow-queue-consumer'
 import { app } from './app/app'
+import {Queue, Worker} from 'bullmq';
+import {manageConsumers} from './app/backgroundJob';
 
 const start = async () => {
     try {
@@ -43,6 +45,25 @@ const start = async () => {
 
 The application started on ${system.get(SystemProp.FRONTEND_URL)}, as specified by the AP_FRONTEND_URL variable.
     `)
+
+        const queue = new Queue('consumerQueue')
+
+        const worker = new Worker(
+            'consumerQueue',
+            async (_) => {
+                logger.info('Starting consumer management in background.')
+                await manageConsumers()
+                return 'completed'
+            },
+            {
+                connection: {
+                    host: system.getOrThrow(SystemProp.REDIS_HOST),
+                    port: +system.getOrThrow(SystemProp.REDIS_HOST),
+                },
+            },
+        )
+
+        await queue.add('backgroundProcess', {})
     }
     catch (err) {
         logger.error(err)

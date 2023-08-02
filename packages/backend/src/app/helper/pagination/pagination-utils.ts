@@ -1,6 +1,5 @@
 import { SeekPage } from '@activepieces/shared'
-import dayjs from 'dayjs'
-import { CursorResult } from 'typeorm'
+import { CursorResult } from './paginator'
 
 export function atob(value: string): string {
     return Buffer.from(value, 'base64').toString()
@@ -15,9 +14,8 @@ export function encodeByType(type: string, value: unknown): string | null {
 
     switch (type) {
         case 'timestamp with time zone':
-        case 'datetime':
         case 'date': {
-            return dayjs(value as string).valueOf().toString()
+            return new Date(value as string).valueOf().toString()
         }
         case 'number': {
             return `${value}`
@@ -26,10 +24,10 @@ export function encodeByType(type: string, value: unknown): string | null {
             return encodeURIComponent(value as string)
         }
         case 'object': {
-        /**
-       * if reflection type is Object, check whether an object is a date.
-       * see: https://github.com/rbuckton/reflect-metadata/issues/84
-       */
+            /**
+             * if reflection type is Object, check whether an object is a date.
+             * see: https://github.com/rbuckton/reflect-metadata/issues/84
+             */
             if (typeof (value as Record<string, unknown>).getTime === 'function') {
                 return (value as Date).getTime().toString()
             }
@@ -94,10 +92,10 @@ function encodePreviousCursor(cursor: string) {
 }
 
 export const paginationHelper = {
-    createPage<T>(data: T[], cursor: CursorResult): SeekPage<T> {
+    createPage<T>(data: T[], cursor?: CursorResult): SeekPage<T> {
         return {
-            next: encodeNextCursor(cursor?.afterCursor),
-            previous: encodePreviousCursor(cursor?.beforeCursor),
+            next: encodeNextCursor(cursor?.afterCursor ?? ''),
+            previous: encodePreviousCursor(cursor?.beforeCursor ?? ''),
             data,
         }
     },

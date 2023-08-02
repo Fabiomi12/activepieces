@@ -17,6 +17,7 @@ import { createPostgresDataSource } from './postgres-connection'
 import { createSqlLiteDatasource } from './sqllite-connection'
 import { DatabaseType, system } from '../helper/system/system'
 import { SystemProp } from '../helper/system/system-prop'
+import {AppConsumerEntity} from '../app-consumer/app-consumer.entity';
 
 const databaseType = system.get(SystemProp.DB_TYPE)
 
@@ -38,8 +39,9 @@ export const commonProperties = {
         WebhookSimulationEntity,
         FolderEntity,
         PieceMetadataEntity,
+        AppConsumerEntity,
     ],
-    synchronize: false,
+    synchronize: true,
 }
 
 export const databaseConnection =

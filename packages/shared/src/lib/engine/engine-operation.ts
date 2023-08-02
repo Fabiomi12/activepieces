@@ -2,7 +2,7 @@ import { ResumeStepMetadata } from "../flow-run/execution/execution-output";
 import { ExecutionState } from "../flow-run/execution/execution-state";
 import { ExecutionType } from "../flow-run/execution/execution-type";
 import { FlowRunId } from "../flow-run/flow-run";
-import { FlowVersion } from "../flows/flow-version";
+import { FlowVersion, FlowVersionId } from "../flows/flow-version";
 import { ProjectId } from "../project/project";
 
 export enum EngineOperationType {
@@ -73,7 +73,7 @@ export type ExecutePropsOptions = BaseEngineOperation & {
 }
 
 type BaseExecuteFlowOperation<T extends ExecutionType> = BaseEngineOperation & {
-    flowVersion: FlowVersion;
+    flowVersionId: FlowVersionId;
     flowRunId: FlowRunId;
     triggerPayload: unknown;
     serverUrl: string;
@@ -148,13 +148,14 @@ interface ExecuteHandshakeTriggerResponse {
 interface ExecuteOnEnableTriggerResponse {
     listeners: AppEventListener[];
     scheduleOptions?: ScheduleOptions;
+    consumer?: ConsumerOptions;
 }
 
 export type ExecuteTriggerResponse<H extends TriggerHookType> = H extends TriggerHookType.RUN ? ExecuteTestOrRunTriggerResponse :
     H extends TriggerHookType.HANDSHAKE ? ExecuteHandshakeTriggerResponse :
-    H extends TriggerHookType.TEST ? ExecuteTestOrRunTriggerResponse :
-    H extends TriggerHookType.ON_DISABLE ? Record<string, never> :
-    ExecuteOnEnableTriggerResponse;
+        H extends TriggerHookType.TEST ? ExecuteTestOrRunTriggerResponse :
+            H extends TriggerHookType.ON_DISABLE ? Record<string, never> :
+                ExecuteOnEnableTriggerResponse;
 
 export type ExecuteActionResponse = {
     success: boolean;
@@ -189,4 +190,11 @@ export enum EngineResponseStatus {
     OK = "OK",
     ERROR = "ERROR",
     TIMEOUT = "TIMEOUT"
+}
+
+export interface ConsumerOptions {
+    host: string;
+    topic: string;
+    clientId: string;
+    groupId: string;
 }
