@@ -52,6 +52,7 @@ export class FlowRightSidebarComponent implements OnInit {
   isCurrentStepPollingTrigger$: Observable<boolean>;
   isResizerGrabbed = false;
   isCurrentStepPieceWebhookTrigger$: Observable<boolean>;
+  isCurrentStepKafkaTrigger$: Observable<boolean>;
   viewMode$: Observable<ViewModeEnum>;
   ViewModeEnum = ViewModeEnum;
   currentStepPieceVersion$: Observable<
@@ -79,6 +80,7 @@ export class FlowRightSidebarComponent implements OnInit {
     this.listenToStepChangeAndAnimateResizer();
     this.checkIfCurrentStepIsPollingTrigger();
     this.checkIfCurrentStepIsPieceWebhookTrigger();
+    this.checkIfCurrentStepIsKafkaTrigger();
     this.checkForViewMode();
   }
 
@@ -143,6 +145,34 @@ export class FlowRightSidebarComponent implements OnInit {
       })
     );
   }
+
+    private checkIfCurrentStepIsKafkaTrigger() {
+        this.isCurrentStepPieceWebhookTrigger$ = this.currentStep$.pipe(
+            switchMap((step) => {
+        if (
+                    step &&
+                    step.type === TriggerType.PIECE &&
+                    step.settings.pieceName !== CORE_SCHEDULE
+                ) {
+                    return this.pieceMetadaService
+                        .getPieceMetadata(
+                            step.settings.pieceName,
+                            step.settings.pieceVersion
+                        )
+                        .pipe(
+              map((res) => {
+                                return (
+                                    res.triggers[step.settings.triggerName] &&
+                                    res.triggers[step.settings.triggerName].type ===
+                                    TriggerStrategy.KAFKA_MESSAGE_CONSUMER
+                                );
+                            })
+                        );
+                }
+                return of(false);
+            })
+        );
+    }
 
   private listenToStepChangeAndAnimateResizer() {
     this.currentStep$ = this.store

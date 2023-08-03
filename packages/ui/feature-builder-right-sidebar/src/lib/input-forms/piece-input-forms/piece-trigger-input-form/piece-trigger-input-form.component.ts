@@ -1,46 +1,27 @@
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component,} from '@angular/core';
 import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-} from '@angular/core';
-import {
-  UntypedFormBuilder,
-  UntypedFormControl,
-  UntypedFormGroup,
-  NG_VALIDATORS,
-  NG_VALUE_ACCESSOR,
-  Validators,
+    NG_VALIDATORS,
+    NG_VALUE_ACCESSOR,
+    UntypedFormBuilder,
+    UntypedFormControl,
+    UntypedFormGroup,
+    Validators,
 } from '@angular/forms';
-import { forkJoin, map, Observable, of, shareReplay, take, tap } from 'rxjs';
-import {
-  TriggerType,
-  UpdateTriggerRequest,
-  AUTHENTICATION_PROPERTY_NAME,
-} from '@activepieces/shared';
-import {
-  PieceAuthProperty,
-  TriggerStrategy,
-} from '@activepieces/pieces-framework';
-import {
-  PieceMetadataService,
-  CORE_SCHEDULE,
-  fadeInUp400ms,
-} from '@activepieces/ui/common';
-import { Store } from '@ngrx/store';
-import {
-  BuilderSelectors,
-  ConnectionDropdownItem,
-  FlowsActions,
-} from '@activepieces/ui/feature-builder-store';
-import { PiecePropertiesFormValue } from '@activepieces/ui/feature-builder-form-controls';
-import { ComponentTriggerInputFormSchema } from '../../input-forms-schema';
-import { PiecePropertyMap } from '@activepieces/pieces-framework';
+import {forkJoin, map, Observable, of, shareReplay, take, tap} from 'rxjs';
+import {AUTHENTICATION_PROPERTY_NAME, TriggerType, UpdateTriggerRequest,} from '@activepieces/shared';
+import {PieceAuthProperty, PiecePropertyMap, TriggerStrategy,} from '@activepieces/pieces-framework';
+import {CORE_SCHEDULE, fadeInUp400ms, PieceMetadataService,} from '@activepieces/ui/common';
+import {Store} from '@ngrx/store';
+import {BuilderSelectors, ConnectionDropdownItem, FlowsActions,} from '@activepieces/ui/feature-builder-store';
+import {PiecePropertiesFormValue} from '@activepieces/ui/feature-builder-form-controls';
+import {ComponentTriggerInputFormSchema} from '../../input-forms-schema';
 
 declare type TriggerDropdownOption = {
   label: {
     name: string;
     description: string;
     isWebhook: boolean;
+    isKafka: boolean;
   };
   value: {
     triggerName: string;
@@ -158,6 +139,7 @@ export class PieceTriggerInputFormComponent {
                 isWebhook:
                   trigger.type === TriggerStrategy.WEBHOOK ||
                   trigger.type === TriggerStrategy.APP_WEBHOOK,
+                isKafka: trigger.type === TriggerStrategy.KAFKA_MESSAGE_CONSUMER
               },
               value: {
                 triggerName: triggerName,

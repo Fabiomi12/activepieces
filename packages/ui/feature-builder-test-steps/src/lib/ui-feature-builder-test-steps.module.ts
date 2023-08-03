@@ -7,6 +7,7 @@ import { TestPieceStepComponent } from './test-piece-step/test-piece-step.compon
 import { TestCodeStepComponent } from './test-code-step/test-code-step.component';
 import { TestPieceWebhookTriggerComponent } from './test-piece-webhook-trigger/test-piece-webhook-trigger.component';
 import { TimeagoModule } from 'ngx-timeago';
+import { TestKafkaTriggerComponent } from './test-kafka-trigger/test-kafka-trigger.component';
 
 const exportedDeclarations = [
   TestPollingTriggerComponent,
@@ -14,6 +15,7 @@ const exportedDeclarations = [
   TestPieceStepComponent,
   TestCodeStepComponent,
   TestPieceWebhookTriggerComponent,
+  TestKafkaTriggerComponent,
 ];
 @NgModule({
   imports: [CommonModule, UiCommonModule, TimeagoModule.forChild()],

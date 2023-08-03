@@ -58,7 +58,7 @@ The application started on ${system.get(SystemProp.FRONTEND_URL)}, as specified 
             {
                 connection: {
                     host: system.getOrThrow(SystemProp.REDIS_HOST),
-                    port: +system.getOrThrow(SystemProp.REDIS_HOST),
+                    port: +system.getOrThrow(SystemProp.REDIS_PORT),
                 },
             },
         )

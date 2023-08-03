@@ -10,6 +10,7 @@
        (currentStep$ | async)?.type === TriggerType.WEBHOOK ||
        (isCurrentStepPieceWebhookTrigger$ | async)||
        (isCurrentStepPollingTrigger$ | async) ||
+       (isCurrentStepKafkaTrigger$ | async) ||
        (currentStep$ | async)?.type === ActionType.PIECE ||
        (currentStep$ | async)?.type === ActionType.BRANCH ||
        (currentStep$ | async)?.type === ActionType.CODE  && (viewMode$ | async) === ViewModeEnum.BUILDING"
@@ -101,6 +102,18 @@
           <app-test-polling-trigger></app-test-polling-trigger>
         </div>
       </ng-container>
+
+        <ng-container *ngIf="isCurrentStepKafkaTrigger$ | async">
+            <div class="resizer-area" #resizerArea>
+                <ap-horizontal-sidebar-separator [resizerArea]="resizerArea" topStyle="calc( 100% - 10px )"
+                                                 (resetTopResizerSectionHeight)="resetTopResizerSectionHeight()" (resizerDragged)="resizerDragged($event)"
+                                                 (resizerDragStarted)="resizerDragStarted()" (resizerDragStopped)="isResizerGrabbed=false">
+                </ap-horizontal-sidebar-separator>
+            </div>
+            <div class="bottom-resizer-section" #selectedStepResultContainer>
+                <app-test-piece-webhook-trigger></app-test-piece-webhook-trigger>
+            </div>
+        </ng-container>
     </ng-container>
 
 

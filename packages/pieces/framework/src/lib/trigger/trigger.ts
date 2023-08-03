@@ -1,6 +1,6 @@
 import { TriggerHookContext } from '../context';
 import { TriggerBase } from '../piece-metadata';
-import { NonAuthPiecePropertyMap, PieceAuthProperty } from '../property/property';
+import { NonAuthPiecePropertyMap, PieceAuthProperty } from '../property';
 
 export enum TriggerStrategy {
     POLLING = 'POLLING',
