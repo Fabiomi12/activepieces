@@ -51,6 +51,7 @@ type KafkaMessageConsumerTriggerHookContext<PieceAuth extends PieceAuthProperty,
         topic: string;
         groupId: string;
         clientId: string;
+        eventTypeRegex: string;
     }): void
     payload: any
 }

@@ -12,6 +12,7 @@ export type AppConsumer = {
     groupId: string
     projectId: ProjectId
     flowId: FlowId
+    eventTypeRegex: string
 }
 
 export const AppConsumerEntity = new EntitySchema<AppConsumer>({
@@ -32,6 +33,10 @@ export const AppConsumerEntity = new EntitySchema<AppConsumer>({
         },
         projectId: ApIdSchema,
         flowId: ApIdSchema,
+        eventTypeRegex: {
+            type: String,
+            nullable: true,
+        },
     },
     indices: [
         {

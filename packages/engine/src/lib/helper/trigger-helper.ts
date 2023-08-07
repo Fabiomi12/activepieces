@@ -72,7 +72,8 @@ export const triggerHelper = {
                     host: request.host,
                     topic: request.topic,
                     clientId: request.clientId,
-                    groupId: request.groupId
+                    groupId: request.groupId,
+                    eventTypeRegex: request.eventTypeRegex,
                 }
             },
             webhookUrl: params.webhookUrl,

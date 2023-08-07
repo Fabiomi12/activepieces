@@ -29,6 +29,12 @@ export const kafkaTrigger = createTrigger({
             required: true,
             defaultValue: '',
         }),
+        eventTypeRegex: Property.LongText({
+            displayName: 'Event type regex',
+            description: 'Regex to filter event type',
+            required: false,
+            defaultValue: '',
+        }),
     },
     type: TriggerStrategy.KAFKA_MESSAGE_CONSUMER,
     sampleData: {
@@ -45,6 +51,7 @@ export const kafkaTrigger = createTrigger({
             topic: ctx.propsValue.topic,
             clientId: ctx.propsValue.clientId,
             groupId: ctx.propsValue.groupId,
+            eventTypeRegex: ctx.propsValue.eventTypeRegex ?? '',
         })
     },
     run(context) {

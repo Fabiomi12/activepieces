@@ -16,7 +16,9 @@ export const waitForApprovalLink = createAction({
         }
       });
 
-      return {}
+      return {
+          approved: true
+      }
     }
     else {
       const payload = ctx.resumePayload as { action: string };
@@ -26,4 +28,7 @@ export const waitForApprovalLink = createAction({
       }
     }
   },
+  sampleData: {
+      approved: true
+  }
 });

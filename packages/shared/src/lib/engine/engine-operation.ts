@@ -197,4 +197,5 @@ export interface ConsumerOptions {
     topic: string;
     clientId: string;
     groupId: string;
+    eventTypeRegex: string;
 }

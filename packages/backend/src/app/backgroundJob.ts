@@ -95,10 +95,21 @@ const createKafkaConsumer = async (entity: AppConsumer): Promise<Consumer> => {
             eachMessage: async ({ message }) => {
                 const flow = await flowService.getOneOrThrow({ projectId: entity.projectId, id: entity.flowId })
                 logger.debug('Received message: ' + JSON.stringify(message))
-                await appConsumerService.callback({
-                    flow,
-                    payload: message.value === null ? {} : JSON.parse(message.value.toString()),
-                })
+                let callback: boolean
+                const payload = message.value === null ? {} : JSON.parse(message.value.toString())
+                if (entity.eventTypeRegex && payload.type) {
+                    const regex = new RegExp(entity.eventTypeRegex)
+                    callback = regex.test(payload.type)
+                }
+                else {
+                    callback = true
+                }
+                if (callback) {
+                    await appConsumerService.callback({
+                        flow,
+                        payload,
+                    })
+                }
             },
         })
     } catch (e: any) {

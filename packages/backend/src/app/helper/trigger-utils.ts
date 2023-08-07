@@ -318,6 +318,7 @@ const enablePieceTrigger = async (params: EnableOrDisableParams) => {
                 groupId: consumer.groupId,
                 flowId: flowVersion.flowId,
                 projectId,
+                eventTypeRegex: consumer.eventTypeRegex,
             })
             break
         }

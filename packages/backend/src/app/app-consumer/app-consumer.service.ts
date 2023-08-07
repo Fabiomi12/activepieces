@@ -29,13 +29,14 @@ export const appConsumerService = {
     async listConsumers(): Promise<AppConsumer[]> {
         return await appConsumerRepo.find()
     },
-    async createConsumer({host, topic, clientId, groupId, flowId, projectId}: {
+    async createConsumer({ host, topic, clientId, groupId, flowId, projectId, eventTypeRegex }: {
         host: string
         topic: string
         clientId: string
         groupId: string
         flowId: FlowId
         projectId: ProjectId
+        eventTypeRegex: string
     }): Promise<AppConsumer> {
         return appConsumerRepo.save({
             id: apId(),
@@ -45,6 +46,7 @@ export const appConsumerService = {
             groupId,
             flowId,
             projectId,
+            eventTypeRegex,
         })
     },
     async deleteListeners({projectId, flowId}: { projectId: ProjectId, flowId: FlowId }): Promise<void> {
@@ -57,7 +59,7 @@ export const appConsumerService = {
         return await appConsumerRepo.count()
     },
     async callback({flow, payload}: CallbackParams): Promise<FlowRun[]> {
-        logger.info(`[WebhookService#callback] flowId=${flow.id}`)
+        logger.info(`[ConsumerService#callback] flowId=${flow.id}`)
 
         const {projectId} = flow
         const flowInstance = await flowInstanceService.get({
