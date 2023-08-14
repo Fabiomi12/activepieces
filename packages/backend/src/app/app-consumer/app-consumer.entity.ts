@@ -47,7 +47,7 @@ export const AppConsumerEntity = new EntitySchema<AppConsumer>({
         {
             name: 'idx_app_consumer_project_id',
             columns: ['projectId'],
-            unique: true,
+            unique: false,
         },
     ],
 })
