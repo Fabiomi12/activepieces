@@ -43,7 +43,20 @@ export const kafkaTrigger = createTrigger({
         "target":"3a5c55fb-a921-40b6-9e40-64328d9c4879",
         "triggeredAt":"2023-08-01T09:46:48.853Z",
         "triggeredBy":"93d17cd5-ee4d-436a-ad91-ff70dca2e7a0",
-        "clientIPAddress":"0.0.0.0"
+        "clientIPAddress":"0.0.0.0",
+        "metadata": {
+            "changes": [
+                {
+                    "name": "startDepreciationDate",
+                    "oldValue":"2023-08-01T09:46:48.853Z",
+                    "newValue":"2023-08-01T09:46:48.853Z",
+                    "action":"EDIT",
+                    "changedAt":"2023-08-01T09:46:48.853Z",
+                    "changedBy":"93d17cd5-ee4d-436a-ad91-ff70dca2e7a0",
+                    "changedByEntity":"PERSON"
+                }
+            ]
+        }
     },
     onEnable: async (ctx) => {
         ctx.createConsumer({
