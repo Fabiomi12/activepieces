@@ -1,4 +1,5 @@
 export * from './lib/test-piece-step/test-piece-step.component';
+export * from './lib/test-kafka-trigger/test-kafka-trigger.component';
 export * from './lib/test-code-step/test-code-step.component';
 export * from './lib/test-piece-webhook-trigger/test-piece-webhook-trigger.component';
 export * from './lib/ui-feature-builder-test-steps.module';

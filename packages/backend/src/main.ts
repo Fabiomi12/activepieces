@@ -8,8 +8,9 @@ import { ApEdition } from '@activepieces/shared'
 import { seedDevData } from './app/database/seeds/dev-seeds'
 import { flowQueueConsumer } from './app/workers/flow-worker/flow-queue-consumer'
 import { app } from './app/app'
-import {Queue, Worker} from 'bullmq';
-import {manageConsumers} from './app/backgroundJob';
+import { Queue, Worker } from 'bullmq'
+import { manageConsumers } from './app/backgroundJob'
+import { createRedisClient } from './app/database/redis-connection'
 
 const start = async () => {
     try {
@@ -46,7 +47,9 @@ const start = async () => {
 The application started on ${system.get(SystemProp.FRONTEND_URL)}, as specified by the AP_FRONTEND_URL variable.
     `)
 
-        const queue = new Queue('consumerQueue')
+        const queue = new Queue('consumerQueue', {
+            connection: createRedisClient(),
+        } )
 
         const worker = new Worker(
             'consumerQueue',
@@ -56,10 +59,7 @@ The application started on ${system.get(SystemProp.FRONTEND_URL)}, as specified 
                 return 'completed'
             },
             {
-                connection: {
-                    host: system.getOrThrow(SystemProp.REDIS_HOST),
-                    port: +system.getOrThrow(SystemProp.REDIS_PORT),
-                },
+                connection: createRedisClient(),
             },
         )
 

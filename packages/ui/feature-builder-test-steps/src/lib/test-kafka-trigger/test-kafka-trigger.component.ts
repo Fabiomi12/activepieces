@@ -26,7 +26,7 @@ import {
   FlowsActions,
 } from '@activepieces/ui/feature-builder-store';
 
-export interface TriggerHistoricalData {
+interface TriggerHistoricalData {
   payload: unknown;
   created: string;
 }
