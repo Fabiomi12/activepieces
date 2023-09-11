@@ -29,11 +29,14 @@ export const appConsumerService = {
     async listConsumers(): Promise<AppConsumer[]> {
         return await appConsumerRepo.find()
     },
-    async createConsumer({ host, topic, clientId, groupId, flowId, projectId, eventTypeRegex }: {
+    async createConsumer({ host, topic, groupId, username, password, mechanism, ssl, flowId, projectId, eventTypeRegex }: {
         host: string
         topic: string
-        clientId: string
         groupId: string
+        username: string
+        password: string
+        mechanism: string
+        ssl: boolean
         flowId: FlowId
         projectId: ProjectId
         eventTypeRegex: string
@@ -42,8 +45,11 @@ export const appConsumerService = {
             id: apId(),
             host,
             topic,
-            clientId,
             groupId,
+            username,
+            password,
+            mechanism,
+            ssl,
             flowId,
             projectId,
             eventTypeRegex,

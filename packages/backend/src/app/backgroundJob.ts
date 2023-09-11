@@ -1,5 +1,5 @@
 import {AppConsumer} from './app-consumer/app-consumer.entity'
-import {Consumer, Kafka} from 'kafkajs'
+import {Consumer, Kafka, SASLOptions} from 'kafkajs'
 import {flowService} from './flows/flow/flow.service'
 import {appConsumerService} from './app-consumer/app-consumer.service'
 import {logger} from './helper/logger'
@@ -52,7 +52,10 @@ export const manageConsumers = async () => {
                             key.host !== consumerEntity.host
                             || key.groupId !== consumerEntity.groupId
                             || key.topic !== consumerEntity.topic
-                            || key.clientId !== consumerEntity.clientId
+                            || key.ssl !== consumerEntity.ssl
+                            || key.username !== consumerEntity.username
+                            || key.password !== consumerEntity.password
+                            || key.mechanism !== consumerEntity.mechanism
                         ) {
                             toUpdate.push({
                                 key,
@@ -79,10 +82,19 @@ export const manageConsumers = async () => {
 }
 
 const createKafkaConsumer = async (entity: AppConsumer): Promise<Consumer> => {
-    logger.debug(`Creating kafka consumer with data: host=${entity.host}, topic=${entity.topic}, clientId=${entity.clientId}, groupId=${entity.groupId}`)
+    logger.debug(`Creating kafka consumer with data: host=${entity.host}, topic=${entity.topic}, groupId=${entity.groupId}`)
+    let sasl = undefined
+    if (entity.username !== '' && entity.password !== '' && entity.mechanism !== '') {
+        sasl = {
+            mechanism: entity.mechanism,
+            username: entity.username,
+            password: entity.password,
+        } as SASLOptions
+    }
     const kafka = new Kafka({
-        clientId: entity.clientId,
         brokers: [entity.host],
+        ssl: entity.ssl,
+        sasl,
     })
 
     const consumer = kafka.consumer({ groupId: entity.groupId })

@@ -71,8 +71,11 @@ export const triggerHelper = {
                 consumer = {
                     host: request.host,
                     topic: request.topic,
-                    clientId: request.clientId,
                     groupId: request.groupId,
+                    username: request.username,
+                    password: request.password,
+                    mechanism: request.mechanism,
+                    ssl: request.ssl,
                     eventTypeRegex: request.eventTypeRegex,
                 }
             },

@@ -195,7 +195,10 @@ export enum EngineResponseStatus {
 export interface ConsumerOptions {
     host: string;
     topic: string;
-    clientId: string;
     groupId: string;
+    username: string;
+    password: string;
+    mechanism: string;
+    ssl: boolean;
     eventTypeRegex: string;
 }

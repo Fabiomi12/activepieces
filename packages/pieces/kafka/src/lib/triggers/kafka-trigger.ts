@@ -17,17 +17,33 @@ export const kafkaTrigger = createTrigger({
             required: true,
             defaultValue: '',
         }),
-        clientId: Property.ShortText({
-            displayName: 'Client Id',
-            description: 'client id',
-            required: true,
-            defaultValue: '',
-        }),
         groupId: Property.ShortText({
             displayName: 'Group Id',
             description: 'consumer group id',
             required: true,
             defaultValue: '',
+        }),
+        username: Property.LongText({
+            displayName: 'Username',
+            description: 'username',
+            required: false,
+            defaultValue: '',
+        }),
+        password: Property.LongText({
+            displayName: 'Password',
+            description: 'password',
+            required: false,
+            defaultValue: '',
+        }),
+        mechanism: Property.LongText({
+            displayName: 'Mechanism',
+            description: 'mechanism (plain, scram-sha-256, scram-sha-512)',
+            required: false,
+            defaultValue: '',
+        }),
+        ssl: Property.Checkbox({
+            displayName: 'SSL',
+            required: false,
         }),
         eventTypeRegex: Property.LongText({
             displayName: 'Event type regex',
@@ -62,8 +78,11 @@ export const kafkaTrigger = createTrigger({
         ctx.createConsumer({
             host: ctx.propsValue.host,
             topic: ctx.propsValue.topic,
-            clientId: ctx.propsValue.clientId,
             groupId: ctx.propsValue.groupId,
+            username: ctx.propsValue.username ?? '',
+            password: ctx.propsValue.password ?? '',
+            mechanism: ctx.propsValue.mechanism ?? '',
+            ssl: ctx.propsValue.ssl ?? false,
             eventTypeRegex: ctx.propsValue.eventTypeRegex ?? '',
         })
     },

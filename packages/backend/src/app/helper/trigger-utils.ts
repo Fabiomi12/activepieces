@@ -314,8 +314,11 @@ const enablePieceTrigger = async (params: EnableOrDisableParams) => {
             await appConsumerService.createConsumer({
                 host: consumer.host,
                 topic: consumer.topic,
-                clientId: consumer.clientId,
                 groupId: consumer.groupId,
+                username: consumer.username ?? '',
+                password: consumer.password ?? '',
+                mechanism: consumer.mechanism ?? '',
+                ssl: consumer.ssl ?? false,
                 flowId: flowVersion.flowId,
                 projectId,
                 eventTypeRegex: consumer.eventTypeRegex,

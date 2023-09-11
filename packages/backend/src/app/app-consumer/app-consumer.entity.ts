@@ -8,8 +8,11 @@ export type AppConsumer = {
     updated: string
     host: string
     topic: string
-    clientId: string
     groupId: string
+    username: string
+    password: string
+    mechanism: string
+    ssl: boolean
     projectId: ProjectId
     flowId: FlowId
     eventTypeRegex: string
@@ -25,8 +28,17 @@ export const AppConsumerEntity = new EntitySchema<AppConsumer>({
         topic: {
             type: String,
         },
-        clientId: {
+        username: {
             type: String,
+        },
+        password: {
+            type: String,
+        },
+        mechanism: {
+            type: String,
+        },
+        ssl: {
+            type: Boolean,
         },
         groupId: {
             type: String,
