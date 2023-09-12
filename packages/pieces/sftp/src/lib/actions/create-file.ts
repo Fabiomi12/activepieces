@@ -5,17 +5,15 @@ import { sftpAuth } from "../..";
 export const createFile = createAction({
     auth: sftpAuth,
     name: 'create_file',
-    displayName: 'Create new file',
+    displayName: 'Create File from Text',
     description: 'Create a new file in the given path',
     props: {
         fileName: Property.ShortText({
             displayName: 'File Path',
-            description: 'The name of the file to create',
             required: true,
         }),
         fileContent: Property.LongText({
             displayName: 'File content',
-            description: 'The content of the file to create',
             required: true,
         })
     },
@@ -36,6 +34,17 @@ export const createFile = createAction({
                 password
             });
 
+            const remotePathExists = await sftp.exists(fileName);
+            if (!remotePathExists) {
+                // Extract the directory path from the fileName
+                const remoteDirectory = fileName.substring(0, fileName.lastIndexOf('/'));
+        
+                // Create the directory if it doesn't exist
+                await sftp.mkdir(remoteDirectory, true); // The second argument 'true' makes the function create all intermediate directories
+        
+                // You can also check if the directory was successfully created and handle any potential errors here
+            }
+        
             await sftp.put(Buffer.from(fileContent), fileName);
             await sftp.end();
 

@@ -1,6 +1,6 @@
 import { Type, Static, } from '@sinclair/typebox';
 
-import { QueryVerType } from '../../pieces';
+import { VersionType } from '../../pieces';
 import { SampleDataSettingsObject } from '../sample-data';
 import { PieceTriggerSettings } from '../triggers/trigger';
 
@@ -23,7 +23,6 @@ const commonActionProps = {
 
 export const CodeActionSettings = Type.Object({
   artifactSourceId: Type.Optional(Type.String({})),
-  artifactPackagedId: Type.Optional(Type.String({})),
   artifact: Type.Optional(Type.String({})),
   input: Type.Record(Type.String({}), Type.Any()),
   inputUiInfo: Type.Optional(SampleDataSettingsObject)
@@ -42,7 +41,7 @@ export const CodeActionSchema = Type.Object({
 // Piece Action
 export const PieceActionSettings = Type.Object({
   pieceName: Type.String({}),
-  pieceVersion: QueryVerType,
+  pieceVersion: VersionType,
   actionName: Type.Optional(Type.String({})),
   input: Type.Record(Type.String({}), Type.Any()),
   inputUiInfo: SampleDataSettingsObject,

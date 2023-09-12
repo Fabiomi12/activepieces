@@ -7,7 +7,7 @@ import {
   StepOutput,
   StepOutputStatus
 } from '@activepieces/shared';
-import { BaseActionHandler, InitStepOutputParams } from './action-handler';
+import { BaseActionHandler, ExecuteContext, InitStepOutputParams } from './action-handler';
 import { codeExecutor } from '../executors/code-executer';
 import { isNil } from '@activepieces/shared'
 
@@ -35,7 +35,7 @@ export class CodeActionHandler extends BaseActionHandler<CodeAction> {
     const censoredInput = await this.variableService.resolve({
       unresolvedInput: this.currentAction.settings.input,
       executionState,
-      censorConnections: true,
+      logs: true,
     })
 
     return {
@@ -45,7 +45,7 @@ export class CodeActionHandler extends BaseActionHandler<CodeAction> {
     }
   }
 
-  override async execute(executionState: ExecutionState, ancestors: [string, number][]): Promise<StepOutput> {
+  override async execute(context: ExecuteContext, executionState: ExecutionState, ancestors: [string, number][]): Promise<StepOutput> {
     const stepOutput = await this.loadStepOutput({
       executionState,
       ancestors,
@@ -54,18 +54,18 @@ export class CodeActionHandler extends BaseActionHandler<CodeAction> {
     const resolvedInput = await this.variableService.resolve({
       unresolvedInput: this.currentAction.settings.input,
       executionState,
-      censorConnections: false,
+      logs: false,
     })
 
-    const artifactPackagedId = this.currentAction.settings.artifactPackagedId
+    const artifactSourceId = this.currentAction.settings.artifactSourceId
 
-    if (isNil(artifactPackagedId)) {
+    if (isNil(artifactSourceId)) {
       throw new Error("Artifact packaged id is not defined");
     }
 
     try {
       stepOutput.output = await codeExecutor.executeCode(
-        artifactPackagedId,
+        artifactSourceId,
         resolvedInput
       )
 

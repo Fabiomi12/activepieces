@@ -1,12 +1,15 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { FolderActions } from '../../store/folders/folders.actions';
-import { environment } from '@activepieces/ui/common';
+import { supportUrl } from '@activepieces/shared';
 
 type SideNavRoute = {
   icon: string;
-  borderColorInTailwind: string;
   caption: string;
   route: string;
   effect?: () => void;
@@ -19,12 +22,14 @@ type SideNavRoute = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidenavRoutesListComponent {
-  constructor(public router: Router, private store: Store) {}
-
+  constructor(
+    public router: Router,
+    private store: Store,
+    private cd: ChangeDetectorRef
+  ) {}
   sideNavRoutes: SideNavRoute[] = [
     {
-      icon: '/assets/img/custom/dashboard/collections.svg',
-      borderColorInTailwind: '!ap-border-purple-border',
+      icon: '/assets/img/custom/dashboard/flows.svg',
       caption: 'Flows',
       route: 'flows',
       effect: () => {
@@ -33,13 +38,11 @@ export class SidenavRoutesListComponent {
     },
     {
       icon: 'assets/img/custom/dashboard/runs.svg',
-      borderColorInTailwind: '!ap-border-green-border',
       caption: 'Runs',
       route: 'runs',
     },
     {
-      icon: 'assets/img/custom/connections.svg',
-      borderColorInTailwind: '!ap-border-blue-border',
+      icon: 'assets/img/custom/dashboard/connections.svg',
       caption: 'Connections',
       route: 'connections',
     },
@@ -60,7 +63,15 @@ export class SidenavRoutesListComponent {
     }
   }
 
-  get environment() {
-    return environment;
+  markChange() {
+    this.cd.detectChanges();
+  }
+
+  public isActive(route: string) {
+    return this.router.url.includes(route);
+  }
+
+  openSupport() {
+    window.open(supportUrl, '_blank', 'noopener');
   }
 }

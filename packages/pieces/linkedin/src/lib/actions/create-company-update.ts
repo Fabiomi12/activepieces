@@ -8,14 +8,13 @@ export const createCompanyUpdate = createAction({
         name: "create_company_update",
         displayName: "Create Company Update",
         description: 'Create a new company update for Company Page',
-        sampleData: {},
         props: {
             company: linkedinCommon.company,
+            imageUrl: linkedinCommon.imageUrl,
             text: linkedinCommon.text,
             link: linkedinCommon.link,
             linkTitle: linkedinCommon.linkTitle,
             linkDescription: linkedinCommon.linkDescription,
-            imageUrl: linkedinCommon.imageUrl
         },
 
         run: async (context) => {
@@ -57,6 +56,8 @@ export const createCompanyUpdate = createAction({
             }
 
             const response = await httpClient.sendRequest(request);
-            return response.body;
+            return {
+                success: true,
+            }
         }
 })

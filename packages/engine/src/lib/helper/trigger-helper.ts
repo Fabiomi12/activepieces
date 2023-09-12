@@ -13,7 +13,8 @@ import {createContextStore} from "../services/storage.service";
 import {VariableService} from "../services/variable-service";
 import {pieceHelper} from "./action-helper";
 import {isValidCron} from 'cron-validator';
-import {TriggerStrategy} from "@activepieces/pieces-framework";
+import { PiecePropertyMap, StaticPropsValue, TriggerStrategy } from "@activepieces/pieces-framework";
+import { createFilesService } from "../services/files.service";
 
 type Listener = {
     events: string[];
@@ -35,13 +36,13 @@ export const triggerHelper = {
         const variableService = new VariableService();
         const executionState = new ExecutionState();
 
-        const resolvedProps = await variableService.resolve({
-            unresolvedInput: input,
-            executionState,
-            censorConnections: false,
-        })
+    const resolvedProps = await variableService.resolve<StaticPropsValue<PiecePropertyMap>>({
+      unresolvedInput: input,
+      executionState,
+      logs: false,
+    })
 
-        const {result: validatedProps, errors} = await variableService.validateAndCast(resolvedProps, trigger.props);
+    const {processedInput, errors} = await variableService.applyProcessorsAndValidators(resolvedProps, trigger.props, piece.auth);
 
         if (Object.keys(errors).length > 0) {
             throw new Error(JSON.stringify(errors));
@@ -80,8 +81,8 @@ export const triggerHelper = {
                 }
             },
             webhookUrl: params.webhookUrl,
-            auth: validatedProps[AUTHENTICATION_PROPERTY_NAME],
-            propsValue: validatedProps,
+            auth: processedInput[AUTHENTICATION_PROPERTY_NAME],
+            propsValue: processedInput,
             payload: params.triggerPayload ?? {},
         };
         switch (params.hookType) {
@@ -114,7 +115,14 @@ export const triggerHelper = {
                 try {
                     return {
                         success: true,
-                        output: await trigger.test(context)
+                        output: await trigger.test({
+                            ...context,
+                            files: createFilesService({
+                                stepName: triggerName,
+                                flowId: params.flowVersion.flowId,
+                                type: 'db'
+                            })
+                        })
                     }
                 } catch (e: any) {
                     console.error(e);
@@ -148,32 +156,39 @@ export const triggerHelper = {
                             webhookSecret: params.webhookSecret,
                         });
 
-                        if (verified === false) {
-                            console.info("Webhook is not verified");
-                            return {
-                                success: false,
-                                message: "Webhook is not verified",
-                                output: []
-                            }
-                        }
-                    } catch (e) {
-                        console.error("Error while verifying webhook", e);
-                        return {
-                            success: false,
-                            message: "Error while verifying webhook",
-                            output: []
-                        }
-                    }
-                }
-                const items = await trigger.run(context);
-                if (!Array.isArray(items)) {
-                    throw new Error(`Trigger run should return an array of items, but returned ${typeof items}`)
-                }
-                return {
-                    success: true,
-                    output: items
-                };
+            if (verified === false) {
+              console.info("Webhook is not verified");
+              return {
+                success: false,
+                message: "Webhook is not verified",
+                output: []
+              }
             }
+          } catch (e) {
+            console.error("Error while verifying webhook", e);
+            return {
+              success: false,
+              message: "Error while verifying webhook",
+              output: []
+            }
+          }
         }
-    },
+        const items = await trigger.run({
+          ...context,
+          files: createFilesService({
+            flowId: params.flowVersion.flowId,
+            stepName: triggerName,
+            type: 'memory'
+          })
+        });
+        if (!Array.isArray(items)) {
+          throw new Error(`Trigger run should return an array of items, but returned ${typeof items}`)
+        }
+        return {
+          success: true,
+          output: items
+        };
+      }
+    }
+  },
 }

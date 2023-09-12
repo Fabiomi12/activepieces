@@ -2,7 +2,7 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { GlobalBuilderState } from '../../model/global-builder-state.model';
 
 import {
-  AppConnection,
+  AppConnectionWithoutSensitiveData,
   ExecutionOutputStatus,
   Flow,
   FlowRun,
@@ -46,7 +46,9 @@ export const selectIsSaving = createSelector(
   selectFlowState,
   (state) =>
     (state.savingStatus & BuilderSavingStatusEnum.SAVING_FLOW) ===
-    BuilderSavingStatusEnum.SAVING_FLOW
+      BuilderSavingStatusEnum.SAVING_FLOW ||
+    (state.savingStatus & BuilderSavingStatusEnum.WAITING_TO_SAVE) ===
+      BuilderSavingStatusEnum.WAITING_TO_SAVE
 );
 
 export const selectFlowHasAnySteps = createSelector(
@@ -160,6 +162,7 @@ const selectTriggerSelectedSampleData = createSelector(
     return undefined;
   }
 );
+/**If string is empty will return the string equivalent of a space */
 const selectStepTestSampleData = createSelector(selectCurrentStep, (step) => {
   if (
     step &&
@@ -169,6 +172,9 @@ const selectStepTestSampleData = createSelector(selectCurrentStep, (step) => {
       step.type === TriggerType.PIECE) &&
     step.settings.inputUiInfo
   ) {
+    if (step.settings.inputUiInfo.currentSelectedData === '') {
+      return ' ';
+    }
     return step.settings.inputUiInfo.currentSelectedData;
   }
   return undefined;
@@ -414,17 +420,20 @@ const selectAllAppConnections = createSelector(
 );
 
 export const selectConnection = (connectionName: string) =>
-  createSelector(selectAllAppConnections, (connections: AppConnection[]) => {
-    return connections.find((c) => c.name === connectionName);
-  });
+  createSelector(
+    selectAllAppConnections,
+    (connections: AppConnectionWithoutSensitiveData[]) => {
+      return connections.find((c) => c.name === connectionName);
+    }
+  );
 
 const selectAppConnectionsDropdownOptions = createSelector(
   selectAllAppConnections,
-  (connections: AppConnection[]) => {
+  (connections: AppConnectionWithoutSensitiveData[]) => {
     return [...connections].map((c) => {
       const result: ConnectionDropdownItem = {
         label: { appName: c.appName, name: c.name },
-        value: `{{connections.${c.name}}}`,
+        value: `{{connections['${c.name}']}}`,
       };
       return result;
     });
@@ -433,11 +442,11 @@ const selectAppConnectionsDropdownOptions = createSelector(
 
 const selectAppConnectionsForMentionsDropdown = createSelector(
   selectAllAppConnections,
-  (connections: AppConnection[]) => {
+  (connections: AppConnectionWithoutSensitiveData[]) => {
     return [...connections].map((c) => {
       const result: MentionListItem = {
         label: c.name,
-        value: `{{connections.${c.name}}}`,
+        value: `{{connections['${c.name}']}}`,
       };
       return result;
     });
@@ -604,6 +613,7 @@ export const BuilderSelectors = {
   selectIsSchduleTrigger,
   selectCurrentStepPieceVersionAndName,
   selectCurrentFlowFolderName,
+  /**If string is empty will return the string equivalent of a space */
   selectStepTestSampleData,
   selectLastTestDate,
   selectNumberOfInvalidSteps,

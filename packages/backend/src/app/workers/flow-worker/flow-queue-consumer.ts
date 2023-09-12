@@ -27,7 +27,7 @@ import { redisQueueManager } from './queues/redis/redis-queue'
 import { QueueMode, system } from '../../helper/system/system'
 import { SystemProp } from '../../helper/system/system-prop'
 
-const queueMode = system.get(SystemProp.QUEUE_MODE) as QueueMode
+const queueMode = system.get(SystemProp.QUEUE_MODE)!
 
 const initFlowQueueConsumer = async (): Promise<void> => {
     switch (queueMode) {
@@ -109,9 +109,7 @@ const consumeRepeatingJob = async (data: RepeatingJobData): Promise<void> => {
                 ),
             )
 
-            const flowVersion = await flowVersionService.getOneOrThrow(
-                data.flowVersionId,
-            )
+            const flowVersion = await flowVersionService.getOne(data.flowVersionId)
             if (isNil(flowVersion)) {
                 await flowQueue.removeRepeatingJob({
                     id: data.flowVersionId,
