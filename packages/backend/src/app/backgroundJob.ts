@@ -30,19 +30,19 @@ export const manageConsumers = async () => {
                     }
                 }
                 logger.info('Removing unused consumers.')
-                const toRemove = []
-                for (const [key, _] of map) {
-                    if (!listExistsById(consumerEntities.values(), key.id)) {
-                        toRemove.push(key)
-                    }
-                }
-                for (const it of toRemove) {
-                    const consumer = map.get(it)
-                    await consumer?.stop()
-                    await consumer?.disconnect()
-                    map.delete(it)
-                    await appConsumerService.deleteListeners({projectId: it.projectId, flowId: it.flowId})
-                }
+                // const toRemove = []
+                // for (const [key, _] of map) {
+                //     if (!listExistsById(consumerEntities.values(), key.id)) {
+                //         toRemove.push(key)
+                //     }
+                // }
+                // for (const it of toRemove) {
+                //     const consumer = map.get(it)
+                //     await consumer?.stop()
+                //     await consumer?.disconnect()
+                //     map.delete(it)
+                //     await appConsumerService.deleteListeners({projectId: it.projectId, flowId: it.flowId})
+                // }
             }
 
             const toUpdate = []
@@ -106,8 +106,8 @@ const createKafkaConsumer = async (entity: AppConsumer): Promise<Consumer> => {
 
         await consumer.run({
             eachMessage: async ({ message }) => {
-                const flow = await flowService.getOneOrThrow({ projectId: entity.projectId, id: entity.flowId })
                 logger.info('Received message: ' + JSON.stringify(message))
+                const flow = await flowService.getOneOrThrow({ projectId: entity.projectId, id: entity.flowId })
                 let callback: boolean
                 const payload = message.value === null ? {} : JSON.parse(message.value.toString())
                 if (entity.eventTypeRegex && payload.type) {
