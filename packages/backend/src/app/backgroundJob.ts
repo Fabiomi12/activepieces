@@ -14,21 +14,22 @@ export const manageConsumers = async () => {
     // eslint-disable-next-line no-constant-condition
     while (true) {
         try {
-            // logger.debug('Checking consumers count.')
-            // logger.debug('Map size: ' + map.size.toString())
+            // logger.info('Checking consumers count.')
+            // logger.info('Map size: ' + map.size.toString())
             const count = await appConsumerService.count()
-            // logger.debug('Consumers count: ' + count.toString())
-            // logger.debug('Fetching consumer configurations.')
+            // logger.info('Consumers count: ' + count.toString())
+            // logger.info('Fetching consumer configurations.')
             const consumerEntities = await appConsumerService.listConsumers()
+            logger.info('Consumers: ' + JSON.stringify(consumerEntities))
             if (count !== map.size) {
-                logger.debug('Creating kafka consumers.')
+                logger.info('Creating kafka consumers.')
                 for (const consumerEntity of consumerEntities) {
                     if (!listExistsById(map.keys(), consumerEntity.id)) {
                         const createdConsumer = await createKafkaConsumer(consumerEntity)
                         map.set(consumerEntity, createdConsumer)
                     }
                 }
-                logger.debug('Removing unused consumers.')
+                logger.info('Removing unused consumers.')
                 const toRemove = []
                 for (const [key, _] of map) {
                     if (!listExistsById(consumerEntities.values(), key.id)) {
@@ -82,7 +83,7 @@ export const manageConsumers = async () => {
 }
 
 const createKafkaConsumer = async (entity: AppConsumer): Promise<Consumer> => {
-    logger.debug(`Creating kafka consumer with data: host=${entity.host}, topic=${entity.topic}, groupId=${entity.groupId}`)
+    logger.info(`Creating kafka consumer with data: host=${entity.host}, topic=${entity.topic}, groupId=${entity.groupId}`)
     let sasl = undefined
     if (entity.username !== '' && entity.password !== '' && entity.mechanism !== '') {
         sasl = {
@@ -106,7 +107,7 @@ const createKafkaConsumer = async (entity: AppConsumer): Promise<Consumer> => {
         await consumer.run({
             eachMessage: async ({ message }) => {
                 const flow = await flowService.getOneOrThrow({ projectId: entity.projectId, id: entity.flowId })
-                logger.debug('Received message: ' + JSON.stringify(message))
+                logger.info('Received message: ' + JSON.stringify(message))
                 let callback: boolean
                 const payload = message.value === null ? {} : JSON.parse(message.value.toString())
                 if (entity.eventTypeRegex && payload.type) {

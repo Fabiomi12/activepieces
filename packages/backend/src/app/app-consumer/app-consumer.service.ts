@@ -41,6 +41,7 @@ export const appConsumerService = {
         projectId: ProjectId
         eventTypeRegex: string
     }): Promise<AppConsumer> {
+        logger.info('App consumer service')
         return appConsumerRepo.save({
             id: apId(),
             host,
