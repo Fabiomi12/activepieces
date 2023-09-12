@@ -7,19 +7,36 @@ import {
     ExecutionState,
     PieceTrigger,
     ScheduleOptions,
-    TriggerHookType, ConsumerOptions
+    TriggerHookType, ConsumerOptions, ApEnvironment
 } from "@activepieces/shared";
 import {createContextStore} from "../services/storage.service";
 import {VariableService} from "../services/variable-service";
 import {pieceHelper} from "./action-helper";
 import {isValidCron} from 'cron-validator';
 import {TriggerStrategy} from "@activepieces/pieces-framework";
-
+import {system} from '../../../../backend/src/app/helper/system/system';
+import {SystemProp} from '../../../../backend/src/app/helper/system/system-prop';
+import pino from 'pino';
 type Listener = {
     events: string[];
     identifierValue: string;
     identifierKey: string;
 }
+
+const initLogger = () => {
+    const env = system.get(SystemProp.ENVIRONMENT)
+
+    const level: pino.Level = env === ApEnvironment.DEVELOPMENT
+        ? 'debug'
+        : 'info'
+
+    return pino({
+        level,
+        transport: env === ApEnvironment.PRODUCTION ? undefined : { target: 'pino-pretty', options: { translateTime: 'HH:MM:ss Z', colorize: true, ignore: 'pid,hostname' } },
+    })
+}
+
+const logger = initLogger()
 
 export const triggerHelper = {
     async executeTrigger(params: ExecuteTriggerOperation<TriggerHookType>): Promise<ExecuteTriggerResponse<TriggerHookType>> {
@@ -68,6 +85,7 @@ export const triggerHelper = {
                 }
             },
             createConsumer(request: ConsumerOptions) {
+                logger.info('trigger-helper#create consumer. Body: ' + JSON.stringify(request))
                 consumer = {
                     host: request.host,
                     topic: request.topic,

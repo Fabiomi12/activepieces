@@ -311,7 +311,8 @@ const enablePieceTrigger = async (params: EnableOrDisableParams) => {
                 break
             }
             const consumer = engineHelperResponse.result.consumer
-            await appConsumerService.createConsumer({
+            logger.info('trigger-utils#314. Consumer body: ' + JSON.stringify(consumer))
+            const created = await appConsumerService.createConsumer({
                 host: consumer.host,
                 topic: consumer.topic,
                 groupId: consumer.groupId,
@@ -323,6 +324,7 @@ const enablePieceTrigger = async (params: EnableOrDisableParams) => {
                 projectId,
                 eventTypeRegex: consumer.eventTypeRegex,
             })
+            logger.info('CreatedConsumer: ' + JSON.stringify(created))
             break
         }
     }
