@@ -34,8 +34,8 @@ export const appEventRoutingController = async (fastify: FastifyInstance) => {
         {
             config: {
                 rawBody: true,
-            },
-            logLevel: 'silent',
+            } as never,
+            logLevel: 'debug',
         },
         async (
             request: FastifyRequest<{
