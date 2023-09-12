@@ -29,19 +29,19 @@ export const manageConsumers = async () => {
                     }
                 }
                 logger.debug('Removing unused consumers.')
-                const toRemove = []
-                for (const [key, _] of map) {
-                    if (!listExistsById(consumerEntities.values(), key.id)) {
-                        toRemove.push(key)
-                    }
-                }
-                for (const it of toRemove) {
-                    const consumer = map.get(it)
-                    await consumer?.stop()
-                    await consumer?.disconnect()
-                    map.delete(it)
-                    await appConsumerService.deleteListeners({projectId: it.projectId, flowId: it.flowId})
-                }
+                // const toRemove = []
+                // for (const [key, _] of map) {
+                //     if (!listExistsById(consumerEntities.values(), key.id)) {
+                //         toRemove.push(key)
+                //     }
+                // }
+                // for (const it of toRemove) {
+                //     const consumer = map.get(it)
+                //     await consumer?.stop()
+                //     await consumer?.disconnect()
+                //     map.delete(it)
+                //     await appConsumerService.deleteListeners({projectId: it.projectId, flowId: it.flowId})
+                // }
             }
 
             const toUpdate = []
